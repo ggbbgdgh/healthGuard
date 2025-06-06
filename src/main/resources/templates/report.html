@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>自动巡检报告</title>
+    <meta charset="UTF-8">
+</head>
+<body>
+<!-- 第一个板块：标题 -->
+<div>
+    <h1>自动巡检报告</h1>
+    <p>报告时间：<span th:text="${reportTime}">2023-10-01 10:00:00</span> (北京时间)</p>
+</div>
+
+<!-- 第二个板块：可用性 -->
+<div>
+    <h2>可用性</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>服务名</th>
+            <th>环境</th>
+            <th>不可用时长</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="service : ${services}">
+            <td th:text="${service.name}">Service Name</td>
+            <td th:text="${service.environment}">Environment</td>
+            <td th:text="${service.downtime}">Downtime</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- 第三个板块：功能测试用例 -->
+<div>
+    <h2>功能测试用例</h2>
+    <div th:each="service : ${services}">
+        <h3 th:text="${service.name}">Service Name</h3>
+        <div th:each="env : ${service.environments}">
+            <h4 th:text="${env.name}">Environment Name</h4>
+            <table>
+                <thead>
+                <tr>
+                    <th>功能测试</th>
+                    <th>总次数</th>
+                    <th>成功次数</th>
+                    <th>失败次数</th>
+                </tr>
+                </thead>
+                <tbody>
+                <!-- 检查 testCases 是否为 null 或为空 -->
+                <tr th:if="${env.testCases != null and !#lists.isEmpty(env.testCases)}" th:each="testCase : ${env.testCases}">
+                    <td th:text="${testCase.name}">Test Case Name</td>
+                    <td th:text="${testCase.totalRuns}">Total Runs</td>
+                    <td th:text="${testCase.successCount}">Success Count</td>
+                    <td th:text="${testCase.failureCount}">Failure Count</td>
+                </tr>
+                </tbody>
+            </table>
+            <div th:if="${env.testCases == null or #lists.isEmpty(env.testCases)}">
+                <button type="button" onclick="toggleDetails(this)">查看失败详情</button>
+                <div class="failure-details" style="">
+                    <ul th:each="failure : ${testCase.failures}">
+                        <li>
+                            <strong>Trace ID:</strong> <span th:text="${failure.traceId}">Trace ID</span><br>
+                            <strong>预期:</strong> <span th:text="${failure.expected}">Expected</span><br>
+                            <strong>失败原因:</strong> <span th:text="${failure.reason}">Reason</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleDetails(button) {
+        var details = button.nextElementSibling;
+        if (details.style.display === "none") {
+            details.style.display = "block";
+        } else {
+            details.style.display = "none";
+        }
+    }
+</script>
+</body>
+</html>
